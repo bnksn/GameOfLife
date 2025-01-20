@@ -1,20 +1,21 @@
 #include "gameOfLife.hpp"
 
-GameOfLife::GameOfLife(BoardDimensions dim) : dim(dim) {}
+GameOfLife::GameOfLife(const int boardSize) : boardSize(boardSize) {}
 
-[[nodiscard]] std::vector<std::vector<int>> GameOfLife::getLiveNeighbourMatrix(
+[[nodiscard]] std::vector<std::vector<int>>
+GameOfLife::getLiveNeighbourMatrix(
     const std::vector<std::vector<char>>& board) const {
     auto liveNeighbourMatrix = std::vector<std::vector<int>>(
-        this->dim.height, std::vector<int>(this->dim.width));
+        this->boardSize, std::vector<int>(this->boardSize));
 
-    for (auto i = 0; i < this->dim.height; ++i) {
-        for (auto j = 0; j < this->dim.width; ++j) {
+    for (auto i = 0; i < this->boardSize; ++i) {
+        for (auto j = 0; j < this->boardSize; ++j) {
             auto count = 0;
             for (const auto [di, dj] : this->directions) {
                 const auto ni = i + di;
                 const auto nj = j + dj;
-                if (ni >= 0 && ni < dim.height && nj >= 0 && nj < dim.width &&
-                    board[ni][nj] == '#') {
+                if (ni >= 0 && ni < this->boardSize && nj >= 0 &&
+                    nj < this->boardSize && board[ni][nj] == '#') {
                     ++count;
                 }
             }
@@ -29,10 +30,10 @@ GameOfLife::GameOfLife(BoardDimensions dim) : dim(dim) {}
     std::vector<std::vector<char>>& curr) const {
     const auto liveNeighbourMatrix = getLiveNeighbourMatrix(curr);
     auto next = std::vector<std::vector<char>>(
-        dim.height, std::vector<char>(dim.width, '_'));
+        this->boardSize, std::vector<char>(this->boardSize, '_'));
 
-    for (auto i = 0; i < dim.height; ++i) {
-        for (auto j = 0; j < dim.width; ++j) {
+    for (auto i = 0; i < this->boardSize; ++i) {
+        for (auto j = 0; j < this->boardSize; ++j) {
             const auto liveCount = liveNeighbourMatrix[i][j];
             const auto alive = curr[i][j] == '#';
             if (alive && 2 <= liveCount && liveCount <= 3 ||
@@ -46,8 +47,9 @@ GameOfLife::GameOfLife(BoardDimensions dim) : dim(dim) {}
 }
 
 [[nodiscard]] std::vector<std::vector<std::vector<char>>>
-GameOfLife::runSimulation(const std::vector<std::vector<char>>& initial,
-                          const int maxIterations) const {
+GameOfLife::runSimulation(
+    const std::vector<std::vector<char>>& initial,
+    const int maxIterations) const {
     auto res = std::vector<std::vector<std::vector<char>>>{initial};
 
     for (auto i = 0; i < maxIterations; ++i) {
