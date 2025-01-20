@@ -39,15 +39,15 @@ std::vector<std::vector<char>> createInitialBoard(
 }
 
 int main() {
-    constexpr auto boardSize = 20;
-    constexpr auto numIterations = 50;
-    const auto initial = createInitialBoard({{'_', '#', '_', '_'},
-                                             {'#', '#', '#', '_'},
-                                             {'_', '#', '_', '_'},
+    constexpr auto boardSize = 50;
+    constexpr auto numIterations = 70;
+    const auto initial = createInitialBoard({{'_', '#', '#', '#'},
+                                             {'#', '_', '_', '_'},
+                                             {'_', '#', '#', '#'},
                                              {'_', '_', '_', '_'}},
                                             boardSize);
 
-    const auto gameOfLife = GameOfLife(boardSize);
-    const auto res = gameOfLife.runSimulation(initial, numIterations);
+    const auto res =
+        GameOfLife(boardSize).runSimulation(initial, numIterations);
     printResults(res);
 }

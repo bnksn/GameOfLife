@@ -10,16 +10,14 @@ GameOfLife::getLiveNeighbourMatrix(
 
     for (auto i = 0; i < this->boardSize; ++i) {
         for (auto j = 0; j < this->boardSize; ++j) {
-            auto count = 0;
             for (const auto [di, dj] : this->directions) {
                 const auto ni = i + di;
                 const auto nj = j + dj;
                 if (ni >= 0 && ni < this->boardSize && nj >= 0 &&
                     nj < this->boardSize && board[ni][nj] == '#') {
-                    ++count;
+                    ++liveNeighbourMatrix[i][j];
                 }
             }
-            liveNeighbourMatrix[i][j] = count;
         }
     }
 
@@ -34,10 +32,10 @@ GameOfLife::getLiveNeighbourMatrix(
 
     for (auto i = 0; i < this->boardSize; ++i) {
         for (auto j = 0; j < this->boardSize; ++j) {
-            const auto liveCount = liveNeighbourMatrix[i][j];
+            const auto liveNeighbours = liveNeighbourMatrix[i][j];
             const auto alive = curr[i][j] == '#';
-            if (alive && 2 <= liveCount && liveCount <= 3 ||
-                !alive && liveCount == 3) {
+            if (alive && 2 <= liveNeighbours && liveNeighbours <= 3 ||
+                !alive && liveNeighbours == 3) {
                 next[i][j] = '#';
             }
         }
