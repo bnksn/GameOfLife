@@ -10,7 +10,7 @@ class GameOfLife {
    private:
     BoardDimensions dim;
 
-    const std::array<std::pair<int, int>, 8> directions{
+    std::array<std::pair<int, int>, 8> directions{
         std::pair{-1, 1}, {0, 1},  {1, 1},   {1, 0},
         {1, -1},          {0, -1}, {-1, -1}, {-1, 0}};
 
