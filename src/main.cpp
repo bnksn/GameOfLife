@@ -4,22 +4,8 @@
 
 #include "gameOfLife.hpp"
 
-void printResults(const std::vector<std::vector<std::vector<char>>>& results) {
-    for (const auto& board : results) {
-        for (const auto& row : board) {
-            for (const auto cell : row) {
-                std::cout << cell;
-            }
-            std::cout << '\n';
-        }
-        std::cout << '\n';
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    }
-}
-
 [[nodiscard]]
-std::vector<std::vector<char>> createInitialBoard(std::vector<std::vector<char>> centre,
+std::vector<std::vector<char>> createInitialBoard(const std::vector<std::vector<char>>& centre,
                                                   const int boardSize) {
     auto initial = std::vector<std::vector<char>>(boardSize, std::vector<char>(boardSize, '_'));
 
@@ -35,22 +21,34 @@ std::vector<std::vector<char>> createInitialBoard(std::vector<std::vector<char>>
     return initial;
 }
 
+template <typename T>
+[[nodiscard]]
+std::vector<T> flatten2dVector(const std::vector<std::vector<T>>& input) noexcept {
+    auto output = std::vector<T>();
+
+    for (const auto& vec : input) {
+        output.insert(output.end(), vec.begin(), vec.end());
+    }
+
+    return output;
+}
+
 int main() {
-    constexpr auto boardSize = 30;
-    constexpr auto numIterations = 70;
-    const auto initial = createInitialBoard(
-        {{'_', '#', '#', '#'}, {'#', '_', '_', '_'}, {'_', '#', '#', '#'}, {'_', '_', '_', '_'}},
-        boardSize);
+    constexpr auto boardSize = 160;
+    constexpr auto numIterations = 4000;
+
+    const auto centre = std::vector<std::vector<char>>{
+        {'_', '#', '#', '#'}, {'#', '_', '_', '_'}, {'_', '#', '#', '#'}, {'_', '_', '_', '_'}};
+    const auto initial = createInitialBoard(centre, boardSize);
 
     const auto gameOfLife = GameOfLife(boardSize);
 
     const auto start = std::chrono::high_resolution_clock::now();
-
-    const auto res = gameOfLife.runSimulation(initial, numIterations);
-
+    const auto boards = gameOfLife.runSimulation(flatten2dVector(initial), numIterations);
     const auto end = std::chrono::high_resolution_clock::now();
-    const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "Simulation took " << duration.count() << " milliseconds\n";
 
-    printResults(res);
+    const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+    std::cout << "Cells per millisecond "
+              << boardSize * boardSize * numIterations / static_cast<double>(duration.count())
+              << '\n';
 }
