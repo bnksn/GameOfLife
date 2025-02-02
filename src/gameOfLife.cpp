@@ -3,13 +3,10 @@
 #include <thread>
 #include <vector>
 
-constexpr static auto directions = std::array<std::pair<int, int>, 8>{
-    std::pair{-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}};
-
 [[nodiscard]]
 std::vector<std::vector<bool>> createInitialBoard(const std::vector<std::vector<bool>>& centre,
                                                   const int boardSize) {
-    auto initial = std::vector<std::vector<bool>>(boardSize, std::vector<bool>(boardSize));
+    auto initial = std::vector<std::vector<bool>>(boardSize, std::vector<bool>(boardSize, false));
 
     const auto topLeftIndex = (boardSize - centre.size()) / 2;
     for (auto i = 0; i < centre.size(); ++i) {
@@ -39,13 +36,15 @@ std::pair<int, int> getWrappedCoordinates(int i, int j, const int boardSize) {
 [[nodiscard]] std::vector<std::vector<int>> getLiveNeighbours(
     const std::vector<std::vector<bool>>& board) {
     const auto size = static_cast<int>(board.size());
+    constexpr auto directions = std::array<std::pair<int, int>, 8>{
+        std::pair{-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}};
     auto liveNeighbourMatrix = std::vector<std::vector<int>>(size, std::vector<int>(size, 0));
 
     for (auto i = 0; i < size; ++i) {
         for (auto j = 0; j < size; ++j) {
             for (const auto& [di, dj] : directions) {
-                const auto& [ni, nj] = getWrappedCoordinates(i + di, j + dj, size);
-                if (ni >= 0 && ni < size && nj >= 0 && nj < size && board[ni][nj]) {
+                const auto [ni, nj] = getWrappedCoordinates(i + di, j + dj, size);
+                if (board[ni][nj]) {
                     ++liveNeighbourMatrix[i][j];
                 }
             }
@@ -89,7 +88,7 @@ void clearScreen() {
 }
 
 int main() {
-    constexpr auto boardSize = 35;
+    constexpr auto boardSize = 30;
     constexpr auto delayMilliseconds = 400;
     const auto centre = std::vector<std::vector<bool>>{{false, true, true, true},
                                                        {true, false, false, false},
