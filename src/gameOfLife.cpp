@@ -1,8 +1,8 @@
+#include <array>
 #include <chrono>
 #include <iostream>
 #include <thread>
 #include <vector>
-#include <array>
 
 [[nodiscard]]
 std::vector<std::vector<bool>> createInitialBoard(const std::vector<std::vector<bool>>& centre,
@@ -89,16 +89,18 @@ void clearScreen() {
 }
 
 int main() {
-    constexpr auto boardSize = 30;
-    constexpr auto delayMilliseconds = 400;
+    constexpr auto boardSize = 36;
+    constexpr auto delayMilliseconds = 200;
     const auto centre = std::vector<std::vector<bool>>{{false, true, true, true},
                                                        {true, false, false, false},
                                                        {false, true, true, true},
                                                        {false, false, false, false}};
     auto board = createInitialBoard(centre, boardSize);
 
+    auto currBoard = 1;
     while (true) {
         clearScreen();
+        std::cout << "board: " << currBoard++ << '\n';
         printBoard(board);
         updateBoard(board);
         std::this_thread::sleep_for(std::chrono::milliseconds(delayMilliseconds));
