@@ -11,15 +11,8 @@ set(CMAKE_CXX_CLANG_TIDY
 
 project(GameOfLife)
 
-add_library(GameOfLifeLib
-    STATIC 
+add_executable(GameOfLife
     src/gameOfLife.cpp 
 )
-
-add_executable(GameOfLife
-    src/main.cpp 
-)
-
-target_link_libraries(GameOfLife PRIVATE GameOfLifeLib) 
 
 add_compile_options(-Wall -Wextra -pedantic -Werror -Wconversion -O3)

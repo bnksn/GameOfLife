@@ -1,5 +1,7 @@
 ## To Do
 
-- GUI
 - User input
-- Multithreading
+
+## How to run
+- cd into the root directory, then "cmake --build ./build/"
+- "./build/GameOfLife

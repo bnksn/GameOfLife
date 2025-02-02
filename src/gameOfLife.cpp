@@ -1,23 +1,52 @@
-#include "gameOfLife.hpp"
+#include <chrono>
+#include <iostream>
+#include <thread>
+#include <vector>
 
-GameOfLife::GameOfLife(const int boardSize) : boardSize(boardSize) {}
+constexpr static auto directions = std::array<std::pair<int, int>, 8>{
+    std::pair{-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}};
 
-[[nodiscard]] std::vector<int> GameOfLife::getLiveNeighbours(const std::vector<char>& board) const {
-    auto liveNeighbourMatrix =
-        std::vector<int>(static_cast<long>(this->boardSize) * this->boardSize);
+[[nodiscard]]
+std::vector<std::vector<bool>> createInitialBoard(const std::vector<std::vector<bool>>& centre,
+                                                  const int boardSize) {
+    auto initial = std::vector<std::vector<bool>>(boardSize, std::vector<bool>(boardSize));
 
-    for (auto i = 0; i < this->boardSize; ++i) {
-        for (auto j = 0; j < this->boardSize; ++j) {
+    const auto topLeftIndex = (boardSize - centre.size()) / 2;
+    for (auto i = 0; i < centre.size(); ++i) {
+        for (auto j = 0; j < centre.size(); ++j) {
+            initial[topLeftIndex + i][topLeftIndex + j] = centre[i][j];
+        }
+    }
+
+    return initial;
+}
+
+[[nodiscard]]
+std::pair<int, int> getWrappedCoordinates(int i, int j, const int boardSize) {
+    if (i < 0) {
+        i += boardSize;
+    }
+    i %= boardSize;
+
+    if (j < 0) {
+        j += boardSize;
+    }
+    j %= boardSize;
+
+    return {i, j};
+}
+
+[[nodiscard]] std::vector<std::vector<int>> getLiveNeighbours(
+    const std::vector<std::vector<bool>>& board) {
+    const auto size = static_cast<int>(board.size());
+    auto liveNeighbourMatrix = std::vector<std::vector<int>>(size, std::vector<int>(size, 0));
+
+    for (auto i = 0; i < size; ++i) {
+        for (auto j = 0; j < size; ++j) {
             for (const auto& [di, dj] : directions) {
-                const int ni = i + di;
-                const int nj = j + dj;
-
-                if (ni < 0 || ni == this->boardSize || nj < 0 || nj == this->boardSize) {
-                    continue;
-                }
-
-                if (board[ni * this->boardSize + nj] == '#') {
-                    ++liveNeighbourMatrix[i * this->boardSize + j];
+                const auto& [ni, nj] = getWrappedCoordinates(i + di, j + dj, size);
+                if (ni >= 0 && ni < size && nj >= 0 && nj < size && board[ni][nj]) {
+                    ++liveNeighbourMatrix[i][j];
                 }
             }
         }
@@ -26,30 +55,52 @@ GameOfLife::GameOfLife(const int boardSize) : boardSize(boardSize) {}
     return liveNeighbourMatrix;
 }
 
-[[nodiscard]] std::vector<char> GameOfLife::getNext(const std::vector<char>& curr) const {
-    const auto liveNeighbours = getLiveNeighbours(curr);
-    auto next = std::vector<char>(static_cast<long>(this->boardSize) * this->boardSize, '_');
+void updateBoard(std::vector<std::vector<bool>>& board) {
+    const auto liveNeighbours = getLiveNeighbours(board);
 
-    for (auto index = 0; index < this->boardSize * this->boardSize; ++index) {
-        const auto numLiveNeighbours = liveNeighbours[index];
-        const auto alive = curr[index] == '#';
-
-        if (alive && 2 <= numLiveNeighbours && numLiveNeighbours <= 3 ||
-            !alive && numLiveNeighbours == 3) {
-            next[index] = '#';
+    for (auto i = 0; i < board.size(); ++i) {
+        for (auto j = 0; j < board.size(); ++j) {
+            const auto numLiveNeighbours = liveNeighbours[i][j];
+            const auto isAlive = board[i][j];
+            board[i][j] = isAlive && 2 <= numLiveNeighbours && numLiveNeighbours <= 3 ||
+                          !isAlive && numLiveNeighbours == 3;
         }
     }
-
-    return next;
 }
 
-[[nodiscard]] std::vector<std::vector<char>> GameOfLife::runSimulation(
-    const std::vector<char>& initial, const int maxIterations) const {
-    std::vector<std::vector<char>> res{initial};
-
-    for (auto i = 0; i < maxIterations; ++i) {
-        res.push_back(getNext(res.back()));
+void printBoard(const std::vector<std::vector<bool>>& board) {
+    for (const auto& row : board) {
+        for (const auto& cell : row) {
+            std::cout << (cell ? '#' : '_') << ' ';
+        }
+        std::cout << '\n';
     }
+    std::cout << '\n';
+}
 
-    return res;
+void clearScreen() {
+#ifdef _WIN32
+    std::system("cls");
+#elif __linux__ || __unix__
+    std::system("clear");
+#else
+    throw std::runtime_error("Cannot clear screen. OS not recognised.");
+#endif
+}
+
+int main() {
+    constexpr auto boardSize = 35;
+    constexpr auto delayMilliseconds = 400;
+    const auto centre = std::vector<std::vector<bool>>{{false, true, true, true},
+                                                       {true, false, false, false},
+                                                       {false, true, true, true},
+                                                       {false, false, false, false}};
+    auto board = createInitialBoard(centre, boardSize);
+
+    while (true) {
+        clearScreen();
+        printBoard(board);
+        updateBoard(board);
+        std::this_thread::sleep_for(std::chrono::milliseconds(delayMilliseconds));
+    }
 }
