@@ -2,6 +2,7 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <array>
 
 [[nodiscard]]
 std::vector<std::vector<bool>> createInitialBoard(const std::vector<std::vector<bool>>& centre,

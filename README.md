@@ -4,5 +4,8 @@
 - Tests
 
 ## How to run
-- cd into the root directory, then "cmake --build ./build/"
+
+- cd into the root directory
+- "cmake -B ./build"
+- "cmake --build ./build/"
 - "./build/GameOfLife"
