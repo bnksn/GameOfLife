@@ -1,50 +1,40 @@
-#include <array>
-#include <chrono>
-#include <iostream>
-#include <thread>
-#include <vector>
+#include "gameOfLife.hpp"
 
-[[nodiscard]]
-std::vector<std::vector<bool>> createInitialBoard(const std::vector<std::vector<bool>>& centre,
-                                                  const int boardSize) {
-    auto initial = std::vector<std::vector<bool>>(boardSize, std::vector<bool>(boardSize, false));
+GameOfLife::GameOfLife(const std::filesystem::path& initialBoardFile, const int delayMilliseconds)
+    : _initialBoardFile(std::move(initialBoardFile)), _delayMilliseconds(delayMilliseconds) {}
 
-    const auto topLeftIndex = (boardSize - centre.size()) / 2;
-    for (auto i = 0; i < centre.size(); ++i) {
-        for (auto j = 0; j < centre.size(); ++j) {
-            initial[topLeftIndex + i][topLeftIndex + j] = centre[i][j];
-        }
-    }
-
-    return initial;
+constexpr std::pair<int, int> GameOfLife::getWrappedCoordinates(const int i, const int j,
+                                                                const int numRows,
+                                                                const int numCols) {
+    return {(i + numRows) % numRows, (j + numCols) % numCols};
 }
 
-[[nodiscard]]
-std::pair<int, int> getWrappedCoordinates(int i, int j, const int boardSize) {
-    if (i < 0) {
-        i += boardSize;
-    }
-    i %= boardSize;
+void GameOfLife::runSimulation() {
+    auto board = readInitialBoard();
 
-    if (j < 0) {
-        j += boardSize;
+    auto currBoard = 1;
+    while (true) {
+        clearScreen();
+        std::cout << "board: " << currBoard++ << '\n';
+        printBoard(board);
+        updateBoard(board);
+        std::this_thread::sleep_for(std::chrono::milliseconds(_delayMilliseconds));
     }
-    j %= boardSize;
-
-    return {i, j};
 }
 
-[[nodiscard]] std::vector<std::vector<int>> getLiveNeighbours(
+[[nodiscard]] std::vector<std::vector<int>> GameOfLife::getLiveNeighbours(
     const std::vector<std::vector<bool>>& board) {
-    const auto size = static_cast<int>(board.size());
+    const auto numRows = static_cast<int>(board.size());
+    const auto numCols = static_cast<int>(board[0].size());
+
+    auto liveNeighbourMatrix = std::vector<std::vector<int>>(numRows, std::vector<int>(numCols, 0));
+
     constexpr auto directions = std::array<std::pair<int, int>, 8>{
         std::pair{-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}};
-    auto liveNeighbourMatrix = std::vector<std::vector<int>>(size, std::vector<int>(size, 0));
-
-    for (auto i = 0; i < size; ++i) {
-        for (auto j = 0; j < size; ++j) {
+    for (auto i = 0; i < numRows; ++i) {
+        for (auto j = 0; j < numCols; ++j) {
             for (const auto& [di, dj] : directions) {
-                const auto [ni, nj] = getWrappedCoordinates(i + di, j + dj, size);
+                const auto [ni, nj] = getWrappedCoordinates(i + di, j + dj, numRows, numCols);
                 if (board[ni][nj]) {
                     ++liveNeighbourMatrix[i][j];
                 }
@@ -55,11 +45,11 @@ std::pair<int, int> getWrappedCoordinates(int i, int j, const int boardSize) {
     return liveNeighbourMatrix;
 }
 
-void updateBoard(std::vector<std::vector<bool>>& board) {
+void GameOfLife::updateBoard(std::vector<std::vector<bool>>& board) {
     const auto liveNeighbours = getLiveNeighbours(board);
 
     for (auto i = 0; i < board.size(); ++i) {
-        for (auto j = 0; j < board.size(); ++j) {
+        for (auto j = 0; j < board[0].size(); ++j) {
             const auto numLiveNeighbours = liveNeighbours[i][j];
             const auto isAlive = board[i][j];
             board[i][j] = isAlive && 2 <= numLiveNeighbours && numLiveNeighbours <= 3 ||
@@ -68,7 +58,7 @@ void updateBoard(std::vector<std::vector<bool>>& board) {
     }
 }
 
-void printBoard(const std::vector<std::vector<bool>>& board) {
+void GameOfLife::printBoard(const std::vector<std::vector<bool>>& board) {
     for (const auto& row : board) {
         for (const auto& cell : row) {
             std::cout << (cell ? '#' : '_') << ' ';
@@ -78,7 +68,7 @@ void printBoard(const std::vector<std::vector<bool>>& board) {
     std::cout << '\n';
 }
 
-void clearScreen() {
+void GameOfLife::clearScreen() {
 #ifdef _WIN32
     std::system("cls");
 #elif __linux__ || __unix__
@@ -88,21 +78,27 @@ void clearScreen() {
 #endif
 }
 
-int main() {
-    constexpr auto boardSize = 36;
-    constexpr auto delayMilliseconds = 200;
-    const auto centre = std::vector<std::vector<bool>>{{false, true, true, true},
-                                                       {true, false, false, false},
-                                                       {false, true, true, true},
-                                                       {false, false, false, false}};
-    auto board = createInitialBoard(centre, boardSize);
+[[nodiscard]]
+std::vector<std::vector<bool>> GameOfLife::readInitialBoard() {
+    std::vector<std::vector<bool>> board;
+    auto file = std::ifstream(_initialBoardFile);
 
-    auto currBoard = 1;
-    while (true) {
-        clearScreen();
-        std::cout << "board: " << currBoard++ << '\n';
-        printBoard(board);
-        updateBoard(board);
-        std::this_thread::sleep_for(std::chrono::milliseconds(delayMilliseconds));
+    if (file.is_open()) {
+        for (auto line = std::string(); std::getline(file, line);) {
+            auto row = std::vector<bool>();
+            auto ss = std::istringstream(line);
+            for (auto symbol = ' '; ss >> symbol;) {
+                row.push_back(symbol == '#');
+            }
+
+            board.push_back(row);
+        }
+
+        file.close();
+    } else {
+        throw std::runtime_error("Failed to open initial board file: " +
+                                 _initialBoardFile.string());
     }
+
+    return board;
 }

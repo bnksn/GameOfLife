@@ -11,8 +11,28 @@ set(CMAKE_CXX_CLANG_TIDY
 
 project(GameOfLife)
 
-add_executable(GameOfLife
+enable_testing()
+
+find_package(GTest REQUIRED)
+
+add_library(GameOfLife
+    STATIC 
     src/gameOfLife.cpp 
 )
+
+add_executable(Main
+    src/main.cpp 
+)
+
+target_link_libraries(Main PRIVATE GameOfLife) 
+
+add_executable(GameOfLifeTests 
+    tests/main.cpp 
+)
+
+target_link_libraries(GameOfLifeTests PRIVATE GTest::gtest GameOfLife)
+
+add_test(NAME GameOfLifeTests
+         COMMAND $<TARGET_FILE:GameOfLifeTests>)
 
 add_compile_options(-Wall -Wextra -pedantic -Werror -Wconversion -O3)
