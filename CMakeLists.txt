@@ -15,22 +15,23 @@ enable_testing()
 
 find_package(GTest REQUIRED)
 
-add_library(GameOfLife
+add_library(GameOfLifeLib
     STATIC 
     src/gameOfLife.cpp 
 )
 
-add_executable(Main
+add_executable(GameOfLife
     src/main.cpp 
 )
 
-target_link_libraries(Main PRIVATE GameOfLife) 
+target_link_libraries(GameOfLife PRIVATE GameOfLifeLib) 
 
 add_executable(GameOfLifeTests 
     tests/main.cpp 
+    tests/gameOfLifeTests.cpp 
 )
 
-target_link_libraries(GameOfLifeTests PRIVATE GTest::gtest GameOfLife)
+target_link_libraries(GameOfLifeTests PRIVATE GTest::gtest GameOfLifeLib)
 
 add_test(NAME GameOfLifeTests
          COMMAND $<TARGET_FILE:GameOfLifeTests>)

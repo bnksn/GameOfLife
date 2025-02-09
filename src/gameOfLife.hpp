@@ -10,27 +10,31 @@
 
 class GameOfLife {
    public:
-    GameOfLife(const std::filesystem::path& initialBoardFile, const int delayMilliseconds);
+    GameOfLife(const int delayMilliseconds);
 
-    void runSimulation();
+    void readInitialBoard(const std::filesystem::path& initialBoardFile);
+
+    void runSimulation(const int numIterations);
+
+    [[nodiscard]]
+    std::vector<std::vector<bool>> getBoard() const;
 
    private:
-    std::filesystem::path _initialBoardFile;
-    int _delayMilliseconds;
+    int _delayMilliseconds{};
+
+    std::vector<std::vector<bool>> _board;
+    int _numRows{};
+    int _numCols{};
 
     [[nodiscard]]
-    constexpr std::pair<int, int> getWrappedCoordinates(const int i, const int j, const int numRows,
-                                                        const int numCols);
+    constexpr std::pair<int, int> getWrappedCoordinates(const int i, const int j) const;
 
-    [[nodiscard]] std::vector<std::vector<int>> getLiveNeighbours(
-        const std::vector<std::vector<bool>>& board);
+    [[nodiscard]] std::vector<std::vector<int>> getLiveNeighbours() const;
+
+    void updateBoard();
+
+    void clearScreen() const;
 
     [[nodiscard]]
-    std::vector<std::vector<bool>> readInitialBoard();
-
-    void updateBoard(std::vector<std::vector<bool>>& board);
-
-    void printBoard(const std::vector<std::vector<bool>>& board);
-
-    void clearScreen();
+    std::string getBoardAsString() const;
 };
