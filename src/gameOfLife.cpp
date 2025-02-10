@@ -85,8 +85,8 @@ constexpr std::pair<int, int> GameOfLife::getWrappedCoordinates(const int i, con
 void GameOfLife::updateBoard() {
     const auto liveNeighbours = getLiveNeighbours();
 
-    for (auto i = 0; i < _board.size(); ++i) {
-        for (auto j = 0; j < _board[0].size(); ++j) {
+    for (auto i = 0; i < _numRows; ++i) {
+        for (auto j = 0; j < _numCols; ++j) {
             const auto numLiveNeighbours = liveNeighbours[i][j];
             const auto isAlive = _board[i][j];
             _board[i][j] = isAlive && 2 <= numLiveNeighbours && numLiveNeighbours <= 3 ||
