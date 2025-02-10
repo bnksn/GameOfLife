@@ -7,8 +7,7 @@
 namespace TestHelpers {
 std::filesystem::path createTempFile(const std::string& initialBoard) {
     const auto tempFile = std::filesystem::temp_directory_path() / "test_board.txt";
-    auto ofs = std::ofstream(tempFile);
-    ofs << initialBoard;
+    std::ofstream(tempFile) << initialBoard;
 
     return tempFile;
 }
@@ -26,7 +25,7 @@ class GameOfLifeTestFixture : public ::testing::Test {
 };
 
 TEST_F(GameOfLifeTestFixture, RunSimulation_Wrap_Stuck) {
-    const std::string initialBoard =
+    const auto initialBoard =
         "#_#\n___\n#_#\n";  // Due to wrapping logic we expect this not to evolve
     _tempFile = TestHelpers::createTempFile(initialBoard);
 
@@ -41,7 +40,7 @@ TEST_F(GameOfLifeTestFixture, RunSimulation_Wrap_Stuck) {
 }
 
 TEST_F(GameOfLifeTestFixture, RunSimulation_EmptyBoard) {
-    const std::string initialBoard = "___\n___\n___\n";
+    const auto initialBoard = "___\n___\n___\n";
     _tempFile = TestHelpers::createTempFile(initialBoard);
 
     auto gameOfLife = GameOfLife(10);
@@ -55,7 +54,7 @@ TEST_F(GameOfLifeTestFixture, RunSimulation_EmptyBoard) {
 }
 
 TEST_F(GameOfLifeTestFixture, RunSimulation_ZeroIterations) {
-    const std::string initialBoard = "##_\n__#\n###\n";
+    const auto initialBoard = "##_\n__#\n###\n";
     _tempFile = TestHelpers::createTempFile(initialBoard);
 
     auto gameOfLife = GameOfLife(10);
@@ -69,7 +68,7 @@ TEST_F(GameOfLifeTestFixture, RunSimulation_ZeroIterations) {
 }
 
 TEST_F(GameOfLifeTestFixture, BlinkerPattern) {
-    const std::string initialBoard = "____\n_###\n____\n____\n";
+    const auto initialBoard = "____\n_###\n____\n____\n";
     _tempFile = TestHelpers::createTempFile(initialBoard);
 
     auto gameOfLife = GameOfLife(10);
