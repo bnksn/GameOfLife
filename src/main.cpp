@@ -1,4 +1,5 @@
 #include <iostream>
+#include <span>
 
 #include "gameOfLife.hpp"
 
