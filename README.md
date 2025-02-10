@@ -1,6 +1,4 @@
-## To Do
-
-- gif
+<img src="https://github.com/bnksn/GameOfLife/blob/main/gallery/demo.gif" width="500" height="500">
 
 ## How to run
 
