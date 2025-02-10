@@ -31,8 +31,9 @@ void GameOfLife::readInitialBoard(const std::filesystem::path& initialBoardFile)
 void GameOfLife::runSimulation(const int numIterations) {
     auto currIteration = 1;
     while (currIteration <= numIterations) {
+        const auto currBoardAsString = getBoardAsString();
         clearScreen();
-        std::cout << "Iteration: " << currIteration++ << '\n' << getBoardAsString();
+        std::cout << "Iteration: " << currIteration++ << '\n' << currBoardAsString;
         updateBoard();
         std::this_thread::sleep_for(std::chrono::milliseconds(_delayMilliseconds));
     }
