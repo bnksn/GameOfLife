@@ -1,4 +1,4 @@
-#include <sstream>
+#include <fstream>
 #include <string>
 
 #include "../src/gameOfLife.hpp"

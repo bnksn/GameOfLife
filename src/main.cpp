@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "gameOfLife.hpp"
 
 int main(int argc, char* argv[]) {

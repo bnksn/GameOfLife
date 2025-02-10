@@ -1,11 +1,6 @@
 #pragma once
 
-#include <array>
-#include <chrono>
 #include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <thread>
 #include <vector>
 
 class GameOfLife {
