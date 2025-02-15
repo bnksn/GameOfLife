@@ -35,14 +35,24 @@ void GameOfLife::readInitialBoard(const std::filesystem::path& initialBoardFile)
 }
 
 void GameOfLife::runSimulation(const int numIterations) {
-    auto currIteration = 1;
-    while (currIteration <= numIterations) {
+    auto totalBoardUpdateTimeNs = 0l;
+
+    for (auto i = 1; i <= numIterations; ++i) {
         const auto currBoardAsString = getBoardAsString();
         clearScreen();
-        std::cout << "Iteration: " << currIteration++ << '\n' << currBoardAsString;
+        std::cout << "Iteration: " << i << '\n' << currBoardAsString;
+
+        const auto start = std::chrono::high_resolution_clock::now();
         updateBoard();
+        const auto end = std::chrono::high_resolution_clock::now();
+        totalBoardUpdateTimeNs +=
+            std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+
         std::this_thread::sleep_for(std::chrono::milliseconds(_delayMilliseconds));
     }
+
+    std::cout << "Average time per board update (ns): "
+              << static_cast<double>(totalBoardUpdateTimeNs) / numIterations << '\n';
 }
 
 [[nodiscard]]
