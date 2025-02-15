@@ -21,10 +21,14 @@ class GameOfLife {
     int _numRows{};
     int _numCols{};
 
+    static constexpr std::array<std::pair<int, int>, 8> _directions = {
+        std::pair{-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}};
+
     [[nodiscard]]
     constexpr std::pair<int, int> getWrappedCoordinates(const int i, const int j) const;
 
-    [[nodiscard]] std::vector<std::vector<int>> getLiveNeighbours() const;
+    [[nodiscard]]
+    int countLiveNeighbours(const int i, const int j) const;
 
     void updateBoard();
 

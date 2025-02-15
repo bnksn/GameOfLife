@@ -67,37 +67,32 @@ constexpr std::pair<int, int> GameOfLife::getWrappedCoordinates(const int i, con
     return {(i + _numRows) % _numRows, (j + _numCols) % _numCols};
 }
 
-[[nodiscard]] std::vector<std::vector<int>> GameOfLife::getLiveNeighbours() const {
-    auto liveNeighbourMatrix =
-        std::vector<std::vector<int>>(_numRows, std::vector<int>(_numCols, 0));
-    constexpr auto directions = std::array<std::pair<int, int>, 8>{
-        std::pair{-1, 1}, {0, 1}, {1, 1}, {1, 0}, {1, -1}, {0, -1}, {-1, -1}, {-1, 0}};
-
-    for (auto i = 0; i < _numRows; ++i) {
-        for (auto j = 0; j < _numCols; ++j) {
-            for (const auto& [di, dj] : directions) {
-                const auto [ni, nj] = getWrappedCoordinates(i + di, j + dj);
-                if (_board[ni][nj]) {
-                    ++liveNeighbourMatrix[i][j];
-                }
-            }
+[[nodiscard]]
+int GameOfLife::countLiveNeighbours(const int i, const int j) const {
+    auto liveNeighbours = 0;
+    for (const auto& [di, dj] : _directions) {
+        auto [ni, nj] = getWrappedCoordinates(i + di, j + dj);
+        if (_board[ni][nj]) {
+            ++liveNeighbours;
         }
     }
 
-    return liveNeighbourMatrix;
+    return liveNeighbours;
 }
 
 void GameOfLife::updateBoard() {
-    const auto liveNeighbours = getLiveNeighbours();
+    auto nextBoard = std::vector<std::vector<bool>>(_numRows, std::vector<bool>(_numCols));
 
     for (auto i = 0; i < _numRows; ++i) {
         for (auto j = 0; j < _numCols; ++j) {
-            const auto numLiveNeighbours = liveNeighbours[i][j];
-            const auto isAlive = _board[i][j];
-            _board[i][j] = isAlive && 2 <= numLiveNeighbours && numLiveNeighbours <= 3 ||
-                           !isAlive && numLiveNeighbours == 3;
+            const auto liveNeighbours = countLiveNeighbours(i, j);
+
+            nextBoard[i][j] = _board[i][j] && (liveNeighbours == 2 || liveNeighbours == 3) ||
+                              !_board[i][j] && liveNeighbours == 3;
         }
     }
+
+    _board = nextBoard;
 }
 
 void GameOfLife::clearScreen() const {
