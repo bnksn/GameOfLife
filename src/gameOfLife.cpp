@@ -8,7 +8,7 @@
 GameOfLife::GameOfLife(const int delayMilliseconds) : _delayMilliseconds(delayMilliseconds) {}
 
 void GameOfLife::readInitialBoard(const std::filesystem::path& initialBoardFile) {
-    std::vector<std::vector<bool>> board;
+    auto board = std::vector<std::vector<bool>>();
     auto file = std::ifstream(initialBoardFile);
 
     if (file.is_open()) {
@@ -35,14 +35,24 @@ void GameOfLife::readInitialBoard(const std::filesystem::path& initialBoardFile)
 }
 
 void GameOfLife::runSimulation(const int numIterations) {
-    auto currIteration = 1;
-    while (currIteration <= numIterations) {
+    auto totalBoardUpdateTimeNs = 0l;
+
+    for (auto i = 1; i <= numIterations; ++i) {
         const auto currBoardAsString = getBoardAsString();
         clearScreen();
-        std::cout << "Iteration: " << currIteration++ << '\n' << currBoardAsString;
+        std::cout << "Iteration: " << i << '\n' << currBoardAsString;
+
+        const auto start = std::chrono::high_resolution_clock::now();
         updateBoard();
+        const auto end = std::chrono::high_resolution_clock::now();
+        totalBoardUpdateTimeNs +=
+            std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+
         std::this_thread::sleep_for(std::chrono::milliseconds(_delayMilliseconds));
     }
+
+    std::cout << "Average time per board update (ns): "
+              << static_cast<double>(totalBoardUpdateTimeNs) / numIterations << '\n';
 }
 
 [[nodiscard]]
@@ -67,7 +77,7 @@ constexpr std::pair<int, int> GameOfLife::getWrappedCoordinates(const int i, con
 int GameOfLife::countLiveNeighbours(const int i, const int j) const {
     auto liveNeighbours = 0;
     for (const auto& [di, dj] : _directions) {
-        auto [ni, nj] = getWrappedCoordinates(i + di, j + dj);
+        const auto [ni, nj] = getWrappedCoordinates(i + di, j + dj);
         if (_board[ni][nj]) {
             ++liveNeighbours;
         }
