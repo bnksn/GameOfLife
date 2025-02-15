@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <filesystem>
 #include <vector>
 
@@ -12,7 +13,7 @@ class GameOfLife {
     void runSimulation(const int numIterations);
 
     [[nodiscard]]
-    std::vector<std::vector<bool>> getBoard() const;
+    std::string getBoardAsString() const;
 
    private:
     int _delayMilliseconds{};
@@ -34,7 +35,4 @@ class GameOfLife {
     void updateBoard();
 
     void clearScreen() const;
-
-    [[nodiscard]]
-    std::string getBoardAsString() const;
 };

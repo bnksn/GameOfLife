@@ -25,62 +25,55 @@ class GameOfLifeTestFixture : public ::testing::Test {
 };
 
 TEST_F(GameOfLifeTestFixture, RunSimulation_Wrap_Stuck) {
-    const auto initialBoard =
-        "#_#\n___\n#_#\n";  // Due to wrapping logic we expect this not to evolve
+    const auto initialBoard = "# _ # \n_ _ _ \n# _ # \n";  // Wrapping logic means this won't evolve
     _tempFile = TestHelpers::createTempFile(initialBoard);
 
     auto gameOfLife = GameOfLife(10);
     gameOfLife.readInitialBoard(_tempFile);
     gameOfLife.runSimulation(2);
 
-    const auto expectedBoard = std::vector<std::vector<bool>>{
-        {true, false, true}, {false, false, false}, {true, false, true}};
+    const auto expectedBoard = "# _ # \n_ _ _ \n# _ # \n";
 
-    EXPECT_EQ(gameOfLife.getBoard(), expectedBoard);
+    EXPECT_EQ(gameOfLife.getBoardAsString(), expectedBoard);
 }
 
 TEST_F(GameOfLifeTestFixture, RunSimulation_EmptyBoard) {
-    const auto initialBoard = "___\n___\n___\n";
+    const auto initialBoard = "_ _ _ \n_ _ _ \n_ _ _ \n";
     _tempFile = TestHelpers::createTempFile(initialBoard);
 
     auto gameOfLife = GameOfLife(10);
     gameOfLife.readInitialBoard(_tempFile);
     gameOfLife.runSimulation(5);
 
-    const auto expectedBoard = std::vector<std::vector<bool>>{
-        {false, false, false}, {false, false, false}, {false, false, false}};
+    const auto expectedBoard = "_ _ _ \n_ _ _ \n_ _ _ \n";
 
-    EXPECT_EQ(gameOfLife.getBoard(), expectedBoard);
+    EXPECT_EQ(gameOfLife.getBoardAsString(), expectedBoard);
 }
 
 TEST_F(GameOfLifeTestFixture, RunSimulation_ZeroIterations) {
-    const auto initialBoard = "##_\n__#\n###\n";
+    const auto initialBoard = "# # _ \n_ _ # \n# # # \n";
     _tempFile = TestHelpers::createTempFile(initialBoard);
 
     auto gameOfLife = GameOfLife(10);
     gameOfLife.readInitialBoard(_tempFile);
     gameOfLife.runSimulation(0);
 
-    const auto expectedBoard = std::vector<std::vector<bool>>{
-        {true, true, false}, {false, false, true}, {true, true, true}};
+    const auto expectedBoard = "# # _ \n_ _ # \n# # # \n";
 
-    EXPECT_EQ(gameOfLife.getBoard(), expectedBoard);
+    EXPECT_EQ(gameOfLife.getBoardAsString(), expectedBoard);
 }
 
 TEST_F(GameOfLifeTestFixture, BlinkerPattern) {
-    const auto initialBoard = "____\n_###\n____\n____\n";
+    const auto initialBoard = "_ _ _ _ \n_ # # # \n_ _ _ _ \n_ _ _ _ \n";
     _tempFile = TestHelpers::createTempFile(initialBoard);
 
     auto gameOfLife = GameOfLife(10);
     gameOfLife.readInitialBoard(_tempFile);
     gameOfLife.runSimulation(2);
 
-    const auto expectedBoard = std::vector<std::vector<bool>>{{false, false, false, false},
-                                                              {false, true, true, true},
-                                                              {false, false, false, false},
-                                                              {false, false, false, false}};
+    const auto expectedBoard = "_ _ _ _ \n_ # # # \n_ _ _ _ \n_ _ _ _ \n";
 
-    EXPECT_EQ(gameOfLife.getBoard(), expectedBoard);
+    EXPECT_EQ(gameOfLife.getBoardAsString(), expectedBoard);
 }
 
 TEST(GameOfLifeTest, RunSimulation_InvalidFile) {

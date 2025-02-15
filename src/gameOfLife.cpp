@@ -59,11 +59,6 @@ std::string GameOfLife::getBoardAsString() const {
 }
 
 [[nodiscard]]
-std::vector<std::vector<bool>> GameOfLife::getBoard() const {
-    return _board;
-}
-
-[[nodiscard]]
 constexpr std::pair<int, int> GameOfLife::getWrappedCoordinates(const int i, const int j) const {
     return {(i + _numRows) % _numRows, (j + _numCols) % _numCols};
 }
