@@ -31,6 +31,7 @@ void GameOfLife::readInitialBoard(const std::filesystem::path& initialBoardFile)
     _numCols = static_cast<int>(board[0].size());
 
     _board = board;
+    _nextBoard = board;
 }
 
 void GameOfLife::runSimulation(const int numIterations) {
@@ -81,18 +82,15 @@ int GameOfLife::countLiveNeighbours(const int i, const int j) const {
 }
 
 void GameOfLife::updateBoard() {
-    auto nextBoard = std::vector<std::vector<bool>>(_numRows, std::vector<bool>(_numCols));
-
     for (auto i = 0; i < _numRows; ++i) {
         for (auto j = 0; j < _numCols; ++j) {
             const auto liveNeighbours = countLiveNeighbours(i, j);
-
-            nextBoard[i][j] = _board[i][j] && (liveNeighbours == 2 || liveNeighbours == 3) ||
-                              !_board[i][j] && liveNeighbours == 3;
+            _nextBoard[i][j] = _board[i][j] && (liveNeighbours == 2 || liveNeighbours == 3) ||
+                               !_board[i][j] && liveNeighbours == 3;
         }
     }
 
-    _board = nextBoard;
+    std::swap(_board, _nextBoard);
 }
 
 void GameOfLife::clearScreen() const {

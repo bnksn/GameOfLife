@@ -18,6 +18,7 @@ class GameOfLife {
     int _delayMilliseconds{};
 
     std::vector<std::vector<bool>> _board;
+    std::vector<std::vector<bool>> _nextBoard;
     int _numRows{};
     int _numCols{};
 
