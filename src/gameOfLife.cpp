@@ -3,7 +3,6 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
-#include <print>
 #include <thread>
 
 GameOfLife::GameOfLife(const int delayMilliseconds) : _delayMilliseconds(delayMilliseconds) {}
@@ -41,7 +40,7 @@ void GameOfLife::runSimulation(const int numIterations) {
     for (auto i = 1; i <= numIterations; ++i) {
         const auto currBoardAsString = getBoardAsString();
         clearScreen();
-        std::print("Iteration: {}\n{}", i, currBoardAsString);
+        std::cout << "Iteration: " << i << '\n' << currBoardAsString;
 
         const auto start = std::chrono::high_resolution_clock::now();
         updateBoard();
@@ -52,8 +51,8 @@ void GameOfLife::runSimulation(const int numIterations) {
         std::this_thread::sleep_for(std::chrono::milliseconds(_delayMilliseconds));
     }
 
-    std::println("Average time per board update (ns): {}",
-                 static_cast<double>(totalBoardUpdateTimeNs) / numIterations);
+    std::cout << "Average time per board update (ns): "
+              << static_cast<double>(totalBoardUpdateTimeNs) / numIterations << '\n';
 }
 
 [[nodiscard]]
